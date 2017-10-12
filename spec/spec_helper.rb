@@ -1,8 +1,10 @@
 require 'rubygems'
 require 'spork'
 
-require 'coveralls'
-Coveralls.wear!
+if RUBY_VERSION > '2.0'
+  require 'coveralls'
+  Coveralls.wear!
+end
 
 Spork.prefork do
   ENV['RAILS_ENV'] ||= 'test'
@@ -36,5 +38,15 @@ Spork.prefork do
     config.after(:suite) do
       FileUtils.rm_rf(File.expand_path('../test.sqlite3', __FILE__))
     end
+  end
+end
+
+def test_request
+  if Rails.version.start_with?('5.1')
+    ActionController::TestRequest.create(ActionController::Metal)
+  elsif Rails.version.start_with?('5')
+    ActionController::TestRequest.create
+  else
+    ActionController::TestRequest.new
   end
 end
